@@ -2,7 +2,7 @@ import time
 import socket
 
 # 组播组IP和端口
-mcast_group_ip = '239.255.255.252'
+mcast_group_ip = '239.0.0.1'
 mcast_group_port = 23456
 
 def sender():
