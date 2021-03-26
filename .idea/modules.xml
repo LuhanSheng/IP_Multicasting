@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/IP_Multicasting.iml" filepath="$PROJECT_DIR$/.idea/IP_Multicasting.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../reliable-multicast-chat-master/.idea/reliable-multicast-chat-master.iml" filepath="$PROJECT_DIR$/../reliable-multicast-chat-master/.idea/reliable-multicast-chat-master.iml" />
+    </modules>
+  </component>
+</project>
