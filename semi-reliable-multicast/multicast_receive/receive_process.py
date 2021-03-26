@@ -27,10 +27,15 @@ class MulticastReceiveProcess:
                 print("while receive message error occur")
                 sys.exit()
 
+    def unicast_send(self, destination, message, is_ack):
+        message += "is_ack: " + is_ack
+        self.sock.sendto(message, destination)
+
     def multicast_receive(self):
         while True:
             message, address = self.sock.recvfrom(self.message_max_size)
             print(message, address)
+            self.unicast_send(address, message, 1)
 
     def run(self):
         thread_routines = [

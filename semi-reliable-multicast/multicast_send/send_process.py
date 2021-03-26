@@ -19,10 +19,13 @@ class MulticastSendProcess:
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message send finish')
             time.sleep(5)
 
+
+
     def multicast_receive(self):
         while True:
             message, address = self.sock.recvfrom(self.message_max_size)
             print(message, address)
+
 
     def run(self):
         thread_routines = [
