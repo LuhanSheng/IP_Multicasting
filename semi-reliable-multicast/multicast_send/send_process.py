@@ -17,7 +17,7 @@ class MulticastSendProcess:
             message = "this message send via mcast !"
             self.sock.sendto(message.encode(), (self.mcast_group_ip, self.mcast_group_port))
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message send finish')
-            time.sleep(10)
+            time.sleep(5)
 
     def multicast_receive(self):
         while True:
@@ -38,3 +38,8 @@ class MulticastSendProcess:
 
         for thread in threads:
             thread.join()
+
+
+if __name__ == '__main__':
+    multicast_send_process = MulticastSendProcess()
+    multicast_send_process.run()

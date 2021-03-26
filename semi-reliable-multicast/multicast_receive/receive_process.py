@@ -46,3 +46,8 @@ class MulticastReceiveProcess:
 
         for thread in threads:
             thread.join()
+
+
+if __name__ == '__main__':
+    multicast_receive_process = MulticastReceiveProcess()
+    multicast_receive_process.run()
