@@ -13,16 +13,17 @@ class MulticastReceiveProcess:
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
-    def multicast_send(self):
+    def multicast_receive(self):
         self.sock.bind(("0.0.0.0", self.mcast_group_port))
         # 加入组播组
         mreq = struct.pack("=4sl", socket.inet_aton(self.mcast_group_ip), socket.INADDR_ANY)
         self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         while True:
             try:
-                message, addr = self.sock.recvfrom(self.message_max_size)
+                message, address = self.sock.recvfrom(self.message_max_size)
                 print(
-                    f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {addr}: {message.decode()}')
+                    f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message.decode()}')
+                self.unicast_send(address, message, 1)
             except:
                 print("while receive message error occur")
                 sys.exit()
@@ -31,15 +32,10 @@ class MulticastReceiveProcess:
         message += "is_ack: " + is_ack
         self.sock.sendto(message, destination)
 
-    def multicast_receive(self):
-        while True:
-            message, address = self.sock.recvfrom(self.message_max_size)
-            print(message, address)
-            self.unicast_send(address, message, 1)
+
 
     def run(self):
         thread_routines = [
-            self.multicast_send,
             self.multicast_receive
         ]
         threads = []
