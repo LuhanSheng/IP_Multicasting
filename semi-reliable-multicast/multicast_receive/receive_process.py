@@ -19,17 +19,14 @@ class MulticastReceiveProcess:
         mreq = struct.pack("=4sl", socket.inet_aton(self.mcast_group_ip), socket.INADDR_ANY)
         self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         while True:
-            try:
-                message, address = self.sock.recvfrom(self.message_max_size)
-                print(
-                    f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message.decode()}')
-                self.unicast_send(address, message, 1)
-            except:
-                print("while receive message error occur")
-                sys.exit()
+            message, address = self.sock.recvfrom(self.message_max_size)
+            print(
+                f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message.decode()}')
+            self.unicast_send(address, message, 1)
+
 
     def unicast_send(self, destination, message, is_ack):
-        message += "is_ack: " + is_ack
+        message += "is_ack:".encode()
         self.sock.sendto(message, destination)
 
 
