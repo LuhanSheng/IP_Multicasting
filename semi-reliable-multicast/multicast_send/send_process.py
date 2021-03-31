@@ -29,7 +29,7 @@ class MulticastSendProcess:
                             [9, bytes(1000)]]
 
     def multicast_send(self, buffer_block):
-        message = buffer_block[1].encode() + buffer_block[1]
+        message = str(buffer_block[0]).encode() + buffer_block[1]
         self.sock.sendto(message, (self.mcast_group_ip, self.mcast_group_port))
         print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message send finish')
 
