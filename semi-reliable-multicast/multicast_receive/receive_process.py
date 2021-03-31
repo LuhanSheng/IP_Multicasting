@@ -4,7 +4,6 @@ import sys
 import threading
 import time
 
-
 class MulticastReceiveProcess:
     def __init__(self):
         self.mcast_group_ip = '239.0.0.1'
@@ -12,6 +11,7 @@ class MulticastReceiveProcess:
         self.message_max_size = 2048
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+
 
     def multicast_receive(self):
         self.sock.bind(("0.0.0.0", self.mcast_group_port))
@@ -26,7 +26,7 @@ class MulticastReceiveProcess:
 
 
     def unicast_send(self, destination, message, is_ack):
-        message += "is_ack:".encode()
+        message = "is_ack:".encode()
         self.sock.sendto(message, destination)
 
 

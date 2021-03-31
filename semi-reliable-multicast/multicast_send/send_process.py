@@ -8,28 +8,48 @@ class MulticastSendProcess:
     def __init__(self):
         self.mcast_group_ip = '239.0.0.1'
         self.mcast_group_port = 23456
-        self.message_max_size = 2048
+        self.message_max_size = 1024
+        self.base = 0
+        self.next_seq_num = 0
+        self.window_size = 4
+        self.window_is_full = False
+        self.window_is_ack = []
+        self.window_is_nak = []
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.file_buffer = [[0, bytes(1000)],
+                            [1, bytes(1000)],
+                            [2, bytes(1000)],
+                            [3, bytes(1000)],
+                            [4, bytes(1000)],
+                            [5, bytes(1000)],
+                            [6, bytes(1000)],
+                            [7, bytes(1000)],
+                            [8, bytes(1000)],
+                            [9, bytes(1000)]]
 
-    def multicast_send(self):
-        while True:
-            message = "this message send via mcast !"
-            self.sock.sendto(message.encode(), (self.mcast_group_ip, self.mcast_group_port))
-            print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message send finish')
-            time.sleep(5)
+    def multicast_send(self, buffer_block):
+        message = buffer_block[1]
+        self.sock.sendto(message.encode(), (self.mcast_group_ip, self.mcast_group_port))
+        print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message send finish')
 
-
+    def send_buffer(self):
+        buffer_length = len(self.file_buffer)
+        while buffer_length >= self.base and self.window_is_full != 0:
+            self.multicast_send(self.file_buffer[self.next_seq_num])
+            self.next_seq_num += 1
+            self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
 
     def multicast_receive(self):
         while True:
             message, address = self.sock.recvfrom(self.message_max_size)
             print(message, address)
-
+            if self.base + 1 == message:
+                self.base += 1
 
     def run(self):
         thread_routines = [
-            self.multicast_send,
+            self.send_buffer,
             self.multicast_receive
         ]
         threads = []
