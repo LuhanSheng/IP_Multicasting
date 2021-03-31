@@ -29,7 +29,7 @@ class MulticastSendProcess:
                             [9, bytes(1000)]]
 
     def multicast_send(self, buffer_block):
-        message = buffer_block[1]
+        message = buffer_block[1].encode() + buffer_block[1]
         self.sock.sendto(message, (self.mcast_group_ip, self.mcast_group_port))
         print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message send finish')
 
@@ -37,7 +37,6 @@ class MulticastSendProcess:
         buffer_length = len(self.file_buffer)
         print(buffer_length)
         while buffer_length >= self.base and self.window_is_full != True:
-            print("xxxx")
             self.multicast_send(self.file_buffer[self.next_seq_num])
             self.next_seq_num += 1
             self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
