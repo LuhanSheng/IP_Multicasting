@@ -35,7 +35,6 @@ class MulticastSendProcess:
 
     def send_buffer(self):
         buffer_length = len(self.file_buffer)
-        print(buffer_length)
         while buffer_length >= self.base and self.window_is_full != True:
             self.multicast_send(self.file_buffer[self.next_seq_num])
             self.next_seq_num += 1
@@ -45,8 +44,12 @@ class MulticastSendProcess:
         while True:
             message, address = self.sock.recvfrom(self.message_max_size)
             print(message, address)
-            if self.base + 1 == message:
+            current = int(message) - 48
+            if self.base == current:
                 self.base += 1
+                self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
+                print(self.next_seq_num, self.base)
+                print(self.window_is_full)
 
     def run(self):
         thread_routines = [

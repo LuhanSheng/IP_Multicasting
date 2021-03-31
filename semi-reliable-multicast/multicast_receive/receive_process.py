@@ -21,13 +21,12 @@ class MulticastReceiveProcess:
         while True:
             message, address = self.sock.recvfrom(self.message_max_size)
             print(
-                f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message.decode()}')
-            self.unicast_send(address, message, 1)
+                f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message.decode()[0]}')
+            self.unicast_send(address, str(message[0]).encode(), 1)
 
 
 
     def unicast_send(self, destination, message, is_ack):
-        message = "is_ack:".encode()
         self.sock.sendto(message, destination)
 
 
