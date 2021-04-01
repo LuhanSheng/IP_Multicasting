@@ -11,7 +11,7 @@ class MulticastReceiveProcess:
         self.message_max_size = 2048
         self.window_size = 4
         self.base = 0
-        self.window_is_received = [False, False, False, False]
+        self.window_is_received = {}
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
     def multicast_receive(self):
@@ -25,12 +25,18 @@ class MulticastReceiveProcess:
                 f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message.decode()[0]}')
             self.unicast_send(address, str(message[0]).encode(), 1)
 
-
-
     def unicast_send(self, destination, message, is_ack):
-        self.sock.sendto(message, destination)
+        if is_ack:
+            current = message.decode() - self.base
+            print(current)
+            self.window_is_received[current] = message.decode()
+            self.sock.sendto(message, destination)
+        else:
+            pass
 
-
+    def window_check(self):
+        while True:
+            pass
 
     def run(self):
         thread_routines = [
