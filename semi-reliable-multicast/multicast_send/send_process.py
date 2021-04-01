@@ -45,7 +45,8 @@ class MulticastSendProcess:
             message, address = self.sock.recvfrom(self.message_max_size)
             print(message, address)
             current = int(message) - 48
-            self.window_is_ack[current - self.base] = True
+            if current <= 3:
+                self.window_is_ack[current - self.base] = True
             # if self.base == current:
             #     self.base += 1
             #     self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True

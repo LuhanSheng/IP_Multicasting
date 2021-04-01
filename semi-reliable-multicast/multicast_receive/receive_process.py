@@ -9,9 +9,10 @@ class MulticastReceiveProcess:
         self.mcast_group_ip = '239.0.0.1'
         self.mcast_group_port = 23456
         self.message_max_size = 2048
-
+        self.window_size = 4
+        self.base = 0
+        self.window_is_received = [False, False, False, False]
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-
 
     def multicast_receive(self):
         self.sock.bind(("0.0.0.0", self.mcast_group_port))
