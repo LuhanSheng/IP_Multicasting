@@ -27,9 +27,8 @@ class MulticastReceiveProcess:
 
     def unicast_send(self, destination, message, is_ack):
         if is_ack:
-            current = message.decode() - self.base
-            print(current)
-            self.window_is_received[current] = message.decode()
+            current = int(message) - self.base - 48
+            self.window_is_received[current] = int(message) - 48
             self.sock.sendto(message, destination)
         else:
             pass

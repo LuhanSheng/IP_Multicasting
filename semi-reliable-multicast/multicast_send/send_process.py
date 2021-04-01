@@ -31,22 +31,24 @@ class MulticastSendProcess:
     def multicast_send(self, buffer_block):
         message = str(buffer_block[0]).encode() + buffer_block[1]
         self.sock.sendto(message, (self.mcast_group_ip, self.mcast_group_port))
-        print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message send finish')
+        print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message '+ str(buffer_block[0]) +' send finish')
 
     def send_buffer(self):
         buffer_length = len(self.file_buffer)
-        while buffer_length >= self.base and not self.window_is_full:
-            self.multicast_send(self.file_buffer[self.next_seq_num])
-            self.next_seq_num += 1
-            self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
+        while True:
+            if buffer_length >= self.base and not self.window_is_full:
+                self.multicast_send(self.file_buffer[self.next_seq_num])
+                self.next_seq_num += 1
+                self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
 
     def multicast_receive(self):
         while True:
             message, address = self.sock.recvfrom(self.message_max_size)
-            print(message, address)
             current = int(message) - 48
-            if current <= 3:
-                self.window_is_ack[current - self.base] = True
+            window_current = current - self.base
+            if window_current <=3:
+            	self.window_is_ack[window_current] = True
+            print(current, address)
             # if self.base == current:
             #     self.base += 1
             #     self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
