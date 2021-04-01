@@ -13,7 +13,7 @@ class MulticastSendProcess:
         self.next_seq_num = 0
         self.window_size = 4
         self.window_is_full = False
-        self.window_is_ack = []
+        self.window_is_ack = [False, False, False, False]
         self.window_is_nak = []
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -35,7 +35,7 @@ class MulticastSendProcess:
 
     def send_buffer(self):
         buffer_length = len(self.file_buffer)
-        while buffer_length >= self.base and self.window_is_full != True:
+        while buffer_length >= self.base and not self.window_is_full:
             self.multicast_send(self.file_buffer[self.next_seq_num])
             self.next_seq_num += 1
             self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
@@ -45,14 +45,24 @@ class MulticastSendProcess:
             message, address = self.sock.recvfrom(self.message_max_size)
             print(message, address)
             current = int(message) - 48
-            if self.base == current:
+            self.window_is_ack[current - self.base] = True
+            # if self.base == current:
+            #     self.base += 1
+            #     self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
+            #     print(self.next_seq_num, self.base)
+            #     print(self.window_is_full)
+
+    def check_window(self):
+        while True:
+            if self.window_is_ack[0]:
+                self.window_is_ack.pop(0)
+                self.window_is_ack.append(False)
                 self.base += 1
                 self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
-                print(self.next_seq_num, self.base)
-                print(self.window_is_full)
 
     def run(self):
         thread_routines = [
+            self.check_window,
             self.send_buffer,
             self.multicast_receive
         ]
