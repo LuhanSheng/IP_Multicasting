@@ -13,8 +13,11 @@ class MulticastSendProcess:
         self.next_seq_num = 0
         self.window_size = 4
         self.window_is_full = False
-        self.window_is_ack = [False, False, False, False]
-        self.window_is_nak = []
+        self.window_is_ack = [0, 0, 0, 0]
+        self.window_is_nak = [0, 0, 0, 0]
+        self.total_nak_num = 0
+        self.message_nak_num = {}
+        self.group_size = 1
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.file_buffer = [[0, bytes(1000)],
@@ -29,9 +32,10 @@ class MulticastSendProcess:
                             [9, bytes(1000)]]
 
     def multicast_send(self, buffer_block):
-        message = str(buffer_block[0]).encode() + buffer_block[1]
+        message = str(buffer_block[0] + " ").encode() + buffer_block[1]
         self.sock.sendto(message, (self.mcast_group_ip, self.mcast_group_port))
-        print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message '+ str(buffer_block[0]) +' send finish')
+        print(
+            f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
 
     def send_buffer(self):
         buffer_length = len(self.file_buffer)
@@ -43,12 +47,18 @@ class MulticastSendProcess:
 
     def multicast_receive(self):
         while True:
-            message, address = self.sock.recvfrom(self.message_max_size)
-            current = int(message) - 48
+            data, address = self.sock.recvfrom(self.message_max_size)
+            [packet_id, is_ack, message] = data.split(" ")
+            current = int(id) - 48
             window_current = current - self.base
-            if window_current <=3:
-            	self.window_is_ack[window_current] = True
-            print(current, address)
+            is_ack = message[1]
+            if window_current <= 3:
+                if is_ack:
+                    self.window_is_ack[window_current] += 1
+                    print(current, address)
+                else:
+                    self.window_is_nak[window_current] += 1
+                    print(current, address)
             # if self.base == current:
             #     self.base += 1
             #     self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
@@ -57,11 +67,14 @@ class MulticastSendProcess:
 
     def check_window(self):
         while True:
-            if self.window_is_ack[0]:
+            if self.window_is_ack[0] + self.window_is_nak[0] == self.group_size:
                 self.window_is_ack.pop(0)
-                self.window_is_ack.append(False)
+                self.window_is_ack.append(0)
                 self.base += 1
                 self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
+                if self.window_is_nak[0] > 0:
+                    self.multicast_send(self.file_buffer[self.next_seq_num])
+
 
     def run(self):
         thread_routines = [
@@ -81,5 +94,6 @@ class MulticastSendProcess:
 
 
 if __name__ == '__main__':
-    multicast_send_process = MulticastSendProcess()
-    multicast_send_process.run()
+
+    # multicast_send_process = MulticastSendProcess()
+    # multicast_send_process.run()

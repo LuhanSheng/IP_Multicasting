@@ -53,5 +53,7 @@ class MulticastReceiveProcess:
 
 
 if __name__ == '__main__':
-    multicast_receive_process = MulticastReceiveProcess()
-    multicast_receive_process.run()
+    m = [None, "x", None]
+    print(m.index("None"))
+    # multicast_receive_process = MulticastReceiveProcess()
+    # multicast_receive_process.run()
