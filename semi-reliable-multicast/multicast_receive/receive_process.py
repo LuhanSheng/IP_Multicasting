@@ -1,8 +1,8 @@
 import socket
 import struct
-import sys
 import threading
 import time
+import random
 
 class MulticastReceiveProcess:
     def __init__(self):
@@ -22,6 +22,8 @@ class MulticastReceiveProcess:
         self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         while True:
             data, address = self.sock.recvfrom(self.message_max_size)
+            if random.random() < 0.5:
+                continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             self.unicast_send(address, message_id, 1, 0, 0)
             message = data[16:]
@@ -60,5 +62,6 @@ class MulticastReceiveProcess:
 
 
 if __name__ == '__main__':
+
     multicast_receive_process = MulticastReceiveProcess()
     multicast_receive_process.run()

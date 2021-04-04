@@ -58,14 +58,14 @@ class MulticastSendProcess:
                 if is_ack:
                     self.window_is_ack[window_current] += 1
                     self.check_window()
-                    print(message_id, address)
+                    print(message_id, "ACK", address)
                 elif is_nak:
                     self.total_nak_num += 1
                     if self.message_nak_num.get(message_id) is None:
                         self.message_nak_num[message_id] = 1
                     else:
                         self.message_nak_num[message_id] += 1
-                    print(message_id, address)
+                    print(message_id, "NAK", address)
                 else:
                     pass
             else:
