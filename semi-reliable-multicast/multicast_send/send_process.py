@@ -66,6 +66,7 @@ class MulticastSendProcess:
                     else:
                         self.message_nak_num[message_id] += 1
                     print(message_id, "NAK", address)
+                    self.check_nak()
                 else:
                     pass
             else:
@@ -81,16 +82,14 @@ class MulticastSendProcess:
                 self.multicast_send(self.file_buffer[self.next_seq_num])
 
     def check_nak(self):
-        while True:
-            if self.total_nak_num > 0:
-                for message_id, nak_num in self.message_nak_num.items():
-                    self.multicast_send(self.file_buffer[message_id])
-                    self.message_nak_num.pop(message_id)
-                    self.total_nak_num -= 1
+        if self.total_nak_num > 0:
+            for message_id, nak_num in self.message_nak_num.items():
+                self.multicast_send(self.file_buffer[message_id])
+                self.message_nak_num.pop(message_id)
+                self.total_nak_num -= 1
 
     def run(self):
         thread_routines = [
-            self.check_nak,
             self.send_buffer,
             self.multicast_receive
         ]
