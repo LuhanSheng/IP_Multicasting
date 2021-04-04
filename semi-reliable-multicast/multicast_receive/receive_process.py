@@ -31,7 +31,7 @@ class MulticastReceiveProcess:
                 f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}')
             current = message_id - self.base
             if current > 0:
-                for i in [self.base, message_id]:
+                for i in range(self.base, message_id):
                     self.unicast_send(address, i, 0, 1, 0)
                     self.base += 1
                 self.base += 1
@@ -62,6 +62,8 @@ class MulticastReceiveProcess:
 
 
 if __name__ == '__main__':
-
-    multicast_receive_process = MulticastReceiveProcess()
-    multicast_receive_process.run()
+    l = range(4,8)
+    for i in l:
+        print(i)
+    # multicast_receive_process = MulticastReceiveProcess()
+    # multicast_receive_process.run()
