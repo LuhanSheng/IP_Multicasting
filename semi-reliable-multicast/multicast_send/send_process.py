@@ -4,6 +4,7 @@ import threading
 import time
 import binascii
 
+
 class MulticastSendProcess:
 
     def __init__(self):
@@ -83,9 +84,8 @@ class MulticastSendProcess:
 
     def check_nak(self):
         if self.total_nak_num > 0:
-            for message_id, nak_num in self.message_nak_num.items():
-                self.multicast_send(self.file_buffer[message_id])
-                self.message_nak_num.pop(message_id)
+            while len(self.message_nak_num) > 0:
+                self.multicast_send(self.file_buffer[self.message_nak_num.popitem()[0]])
                 self.total_nak_num -= 1
 
     def run(self):
