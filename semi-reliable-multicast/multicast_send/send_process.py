@@ -1,7 +1,8 @@
 import socket
+import struct
 import threading
 import time
-
+import binascii
 
 class MulticastSendProcess:
 
@@ -18,6 +19,7 @@ class MulticastSendProcess:
         self.total_nak_num = 0
         self.message_nak_num = {}
         self.group_size = 1
+        self.struct = struct.Struct('IIII')
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.file_buffer = [[0, bytes(1000)],
@@ -32,8 +34,10 @@ class MulticastSendProcess:
                             [9, bytes(1000)]]
 
     def multicast_send(self, buffer_block):
-        message = str(buffer_block[0] + " ").encode() + buffer_block[1]
-        self.sock.sendto(message, (self.mcast_group_ip, self.mcast_group_port))
+        data = (buffer_block[0], 0, 0, len(buffer_block[1]))
+        s = struct.Struct('IIII')
+        packed_data = s.pack(*data) + buffer_block[1]
+        self.sock.sendto(packed_data, (self.mcast_group_ip, self.mcast_group_port))
         print(
             f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
 
@@ -48,37 +52,45 @@ class MulticastSendProcess:
     def multicast_receive(self):
         while True:
             data, address = self.sock.recvfrom(self.message_max_size)
-            [packet_id, is_ack, message] = data.split(" ")
-            current = int(id) - 48
-            window_current = current - self.base
-            is_ack = message[1]
+            (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
+            window_current = message_id - self.base
             if window_current <= 3:
                 if is_ack:
                     self.window_is_ack[window_current] += 1
-                    print(current, address)
+                    self.check_window()
+                    print(message_id, address)
+                elif is_nak:
+                    self.total_nak_num += 1
+                    if self.message_nak_num.get(message_id) is None:
+                        self.message_nak_num[message_id] = 1
+                    else:
+                        self.message_nak_num[message_id] += 1
+                    print(message_id, address)
                 else:
-                    self.window_is_nak[window_current] += 1
-                    print(current, address)
-            # if self.base == current:
-            #     self.base += 1
-            #     self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
-            #     print(self.next_seq_num, self.base)
-            #     print(self.window_is_full)
+                    pass
+            else:
+                raise ValueError
 
     def check_window(self):
-        while True:
-            if self.window_is_ack[0] + self.window_is_nak[0] == self.group_size:
-                self.window_is_ack.pop(0)
-                self.window_is_ack.append(0)
-                self.base += 1
-                self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
-                if self.window_is_nak[0] > 0:
-                    self.multicast_send(self.file_buffer[self.next_seq_num])
+        if self.window_is_ack[0] > 0:
+            self.window_is_ack.pop(0)
+            self.window_is_ack.append(0)
+            self.base += 1
+            self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
+            if self.window_is_nak[0] > 0:
+                self.multicast_send(self.file_buffer[self.next_seq_num])
 
+    def check_nak(self):
+        while True:
+            if self.total_nak_num > 0:
+                for message_id, nak_num in self.message_nak_num.items():
+                    self.multicast_send(self.file_buffer[message_id])
+                    self.message_nak_num.pop(message_id)
+                    self.total_nak_num -= 1
 
     def run(self):
         thread_routines = [
-            self.check_window,
+            self.check_nak,
             self.send_buffer,
             self.multicast_receive
         ]
@@ -94,6 +106,5 @@ class MulticastSendProcess:
 
 
 if __name__ == '__main__':
-
-    # multicast_send_process = MulticastSendProcess()
-    # multicast_send_process.run()
+    multicast_send_process = MulticastSendProcess()
+    multicast_send_process.run()
