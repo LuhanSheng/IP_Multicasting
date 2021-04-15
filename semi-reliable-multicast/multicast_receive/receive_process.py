@@ -62,8 +62,5 @@ class MulticastReceiveProcess:
 
 
 if __name__ == '__main__':
-    l = range(4,8)
-    for i in l:
-        print(i)
-    # multicast_receive_process = MulticastReceiveProcess()
-    # multicast_receive_process.run()
+    multicast_receive_process = MulticastReceiveProcess()
+    multicast_receive_process.run()
