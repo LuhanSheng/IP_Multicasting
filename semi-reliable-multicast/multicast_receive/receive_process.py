@@ -22,7 +22,7 @@ class MulticastReceiveProcess:
         self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         while True:
             data, address = self.sock.recvfrom(self.message_max_size)
-            if random.random() < 1:
+            if random.random() < 0.9:
                 continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             self.unicast_send(address, max(message_id, self.base), 1, 0, 0)

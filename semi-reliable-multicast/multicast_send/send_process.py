@@ -50,8 +50,7 @@ class MulticastSendProcess:
             window_current = message_id - self.base
             if window_current <= 3:
                 if is_ack:
-                    for i in range(0, window_current + 1):
-                        self.window_is_ack[i] += 1
+                    self.window_is_ack[window_current] += 1
                     self.check_window()
                     print(message_id, "ACK", address)
                 elif is_nak:
