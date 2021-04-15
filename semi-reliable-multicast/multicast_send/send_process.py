@@ -73,6 +73,7 @@ class MulticastSendProcess:
             self.window_is_ack.append(0)
             self.base += 1
             self.timer.cancel()
+            self.new_timer()
             self.timer.start()
             self.congestion_window += 1
             self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
@@ -86,7 +87,11 @@ class MulticastSendProcess:
     def resent_message(self):
         self.timer.cancel()
         self.multicast_send(self.file_buffer[self.base])
+        self.new_timer()
         self.timer.start()
+
+    def new_timer(self):
+        self.timer = threading.Timer(0.2, self.resent_message)
 
     def run(self):
         thread_routines = [
