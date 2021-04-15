@@ -36,6 +36,7 @@ class MulticastSendProcess:
 
     def send_buffer(self):
         buffer_length = len(self.file_buffer)
+        self.timer.start()
         while True:
             if buffer_length >= self.base and not self.window_is_full and self.next_seq_num - self.base < self.congestion_window:
                 self.multicast_send(self.file_buffer[self.next_seq_num])
@@ -71,6 +72,7 @@ class MulticastSendProcess:
             self.window_is_ack.pop(0)
             self.window_is_ack.append(0)
             self.base += 1
+            self.timer.cancel()
             self.timer.start()
             self.congestion_window += 1
             self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
@@ -82,6 +84,7 @@ class MulticastSendProcess:
                 self.total_nak_num -= 1
 
     def resent_message(self):
+        self.timer.cancel()
         self.multicast_send(self.file_buffer[self.base])
         self.timer.start()
 
