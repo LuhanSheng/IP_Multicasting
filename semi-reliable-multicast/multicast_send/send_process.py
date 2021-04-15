@@ -21,18 +21,10 @@ class MulticastSendProcess:
         self.message_nak_num = {}
         self.group_size = 1
         self.struct = struct.Struct('IIII')
-
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.file_buffer = [[0, bytes(1000)],
-                            [1, bytes(1000)],
-                            [2, bytes(1000)],
-                            [3, bytes(1000)],
-                            [4, bytes(1000)],
-                            [5, bytes(1000)],
-                            [6, bytes(1000)],
-                            [7, bytes(1000)],
-                            [8, bytes(1000)],
-                            [9, bytes(1000)]]
+        self.file_buffer = [[i, bytes(1000)] for i in range(100)]
+        self.congestion_window = 1
+        self.timer = threading.Timer(0.2, self.resent_message)
 
     def multicast_send(self, buffer_block):
         data = (buffer_block[0], 0, 0, len(buffer_block[1]))
@@ -45,7 +37,7 @@ class MulticastSendProcess:
     def send_buffer(self):
         buffer_length = len(self.file_buffer)
         while True:
-            if buffer_length >= self.base and not self.window_is_full:
+            if buffer_length >= self.base and not self.window_is_full and self.next_seq_num - self.base < self.congestion_window:
                 self.multicast_send(self.file_buffer[self.next_seq_num])
                 self.next_seq_num += 1
                 self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
@@ -57,7 +49,8 @@ class MulticastSendProcess:
             window_current = message_id - self.base
             if window_current <= 3:
                 if is_ack:
-                    self.window_is_ack[window_current] += 1
+                    for i in range(0, window_current + 1):
+                        self.window_is_ack[i] += 1
                     self.check_window()
                     print(message_id, "ACK", address)
                 elif is_nak:
@@ -74,19 +67,23 @@ class MulticastSendProcess:
                 raise ValueError
 
     def check_window(self):
-        if self.window_is_ack[0] > 0:
+        while self.window_is_ack[0] > 0:
             self.window_is_ack.pop(0)
             self.window_is_ack.append(0)
             self.base += 1
+            self.timer.start()
+            self.congestion_window += 1
             self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
-            if self.window_is_nak[0] > 0:
-                self.multicast_send(self.file_buffer[self.next_seq_num])
 
     def check_nak(self):
         if self.total_nak_num > 0:
             while len(self.message_nak_num) > 0:
                 self.multicast_send(self.file_buffer[self.message_nak_num.popitem()[0]])
                 self.total_nak_num -= 1
+
+    def resent_message(self):
+        self.multicast_send(self.file_buffer[self.base])
+        self.timer.start()
 
     def run(self):
         thread_routines = [
