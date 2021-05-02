@@ -55,6 +55,7 @@ class MulticastSendProcess:
                     print(message_id, "ACK", address)
                 elif is_nak:
                     self.total_nak_num += 1
+                    self.congestion_window -= 1 / self.group_size
                     if self.message_nak_num.get(message_id) is None:
                         self.message_nak_num[message_id] = 1
                     else:
@@ -89,6 +90,7 @@ class MulticastSendProcess:
         self.multicast_send(self.file_buffer[self.base])
         self.new_timer()
         self.timer.start()
+        self.congestion_window = 1
 
     def new_timer(self):
         self.timer = threading.Timer(0.2, self.resent_message)
@@ -104,7 +106,6 @@ class MulticastSendProcess:
             thread.daemon = True
             thread.start()
             threads.append(thread)
-
         for thread in threads:
             thread.join()
 
