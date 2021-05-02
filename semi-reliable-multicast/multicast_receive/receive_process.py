@@ -15,11 +15,7 @@ class MulticastReceiveProcess:
         self.window_is_received = [-1, -1, -1, -1]
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.struct = struct.Struct('IIII')
-        signal.signal(signal.SIGINT, self.keyboard_handler)
 
-    def keyboard_handler(signum, frame):
-        global stop
-        stop = True
 
     def multicast_receive(self):
         self.sock.bind(("0.0.0.0", self.mcast_group_port))
@@ -27,15 +23,17 @@ class MulticastReceiveProcess:
         mreq = struct.pack("=4sl", socket.inet_aton(self.mcast_group_ip), socket.INADDR_ANY)
         self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         f = open('receive.txt', 'w')
-        while True and not stop:
+        while True:
             data, address = self.sock.recvfrom(self.message_max_size)
-            if random.random() < 0.3:
+            if random.random() < 0.5:
                 continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             self.unicast_send(address, message_id, 1, 0, 0)
             message = data[16:]
             f.write(str(message_id) + "\n")
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}')
+            if message_id == 19:
+            	break
             current = message_id - self.base
             if current > 0:
                 for i in range(self.base, message_id):
