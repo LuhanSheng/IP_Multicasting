@@ -28,7 +28,7 @@ class MulticastReceiveProcess:
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             self.unicast_send(address, message_id, 1, 0, 0)
             message = data[16:]
-            f.write(message_id + "\n")
+            f.write(str(message_id) + "\n")
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}')
             current = message_id - self.base
             if current > 0:
