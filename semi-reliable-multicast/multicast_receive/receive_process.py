@@ -27,21 +27,21 @@ class MulticastReceiveProcess:
         f = open(str(self.ip) + '_receive.txt', 'w')
         while True:
             data, address = self.sock.recvfrom(self.message_max_size)
-            if random.random() < 0.8:
+            if random.random() < 0.1:
                 continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             self.unicast_send(address, message_id, 1, 0, 0)
             message = data[16:]
             f.write(str(message_id) + "\n")
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}')
-            if message_id == self.total_packet_num - 1:
+            if self.base == self.total_packet_num - 1:
                 break
             current = message_id - self.base
             if current > 0:
                 for i in range(self.base, message_id):
                     self.unicast_send(address, i, 0, 1, 0)
-                    self.base += 1
-                self.base += 1
+                    # self.base += 1
+                # self.base += 1
             elif current == 0:
                 self.base += 1
             else:

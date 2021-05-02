@@ -25,7 +25,7 @@ class MulticastSendProcess:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.block_num = 200
         self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
-        self.congestion_window = 2
+        self.congestion_window = 1
         self.timer = threading.Timer(0.1, self.resent_message)
         self.start = time.time()
 
@@ -50,7 +50,7 @@ class MulticastSendProcess:
             data, address = self.sock.recvfrom(self.message_max_size)
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             window_current = message_id - self.base
-            if window_current <= 3:
+            if window_current <= self.window_size - 1:
                 if is_ack:
                     self.window_is_ack[window_current] += 1
                     self.check_window()
