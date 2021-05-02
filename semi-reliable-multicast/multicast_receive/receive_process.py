@@ -17,6 +17,7 @@ class MulticastReceiveProcess:
         self.ip = socket.gethostbyname(socket.gethostname())
         self.struct = struct.Struct('IIII')
         self.total_packet_num = 200
+        self.cached_block_num = set()
 
 
     def multicast_receive(self):
@@ -40,10 +41,14 @@ class MulticastReceiveProcess:
             if current > 0:
                 for i in range(self.base, message_id):
                     self.unicast_send(address, i, 0, 1, 0)
+                self.cached_block_num.add(current)
                     # self.base += 1
                 # self.base += 1
             elif current == 0:
                 self.base += 1
+                while self.base in self.cached_block_num:
+                    self.base += 1
+                    self.cached_block_num.remove(self.base)
             else:
                 pass
         f.close()

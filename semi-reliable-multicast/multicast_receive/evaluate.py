@@ -8,7 +8,6 @@ def evaluate(ip, totalPacketNum):
     for line in lines:
         s.add(line[0:-1])
         l.append(line[0:-1])
-        print(line[0:-1])
 
     print("Total number of received: ", len(l))
     print("Effective number of received: ", len(s))
