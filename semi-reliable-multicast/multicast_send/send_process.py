@@ -1,3 +1,4 @@
+import sys
 import socket
 import struct
 import threading
@@ -24,8 +25,9 @@ class MulticastSendProcess:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.block_num = 200
         self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
-        self.congestion_window = 1
-        self.timer = threading.Timer(0.2, self.resent_message)
+        self.congestion_window = 2
+        self.timer = threading.Timer(0.1, self.resent_message)
+        self.start = time.time()
 
     def multicast_send(self, buffer_block):
         data = (buffer_block[0], 0, 0, len(buffer_block[1]))
@@ -36,15 +38,9 @@ class MulticastSendProcess:
             f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
 
     def send_buffer(self):
-        buffer_length = len(self.file_buffer)
         self.timer.start()
-        start = time.clock()
         while True:
-            if self.next_seq_num == self.block_num:
-                end = time.clock()
-                print(end - start)
-                break
-            if buffer_length >= self.base and not self.window_is_full and self.next_seq_num - self.base < self.congestion_window:
+            if self.block_num >= self.base and not self.window_is_full and self.next_seq_num - self.base < self.congestion_window:
                 self.multicast_send(self.file_buffer[self.next_seq_num])
                 self.next_seq_num += 1
                 self.window_is_full = False if self.next_seq_num - self.base < self.window_size else True
@@ -91,6 +87,9 @@ class MulticastSendProcess:
                 self.total_nak_num -= 1
 
     def resent_message(self):
+        if self.base == self.block_num:
+            print('Running time: %s Seconds'%str(time.time() - self.start))
+            sys.exit()
         print("resend message: ", self.base)
         self.timer.cancel()
         self.multicast_send(self.file_buffer[self.base])
@@ -99,7 +98,7 @@ class MulticastSendProcess:
         self.congestion_window = 1
 
     def new_timer(self):
-        self.timer = threading.Timer(0.2, self.resent_message)
+        self.timer = threading.Timer(0.1, self.resent_message)
 
     def run(self):
         thread_routines = [
