@@ -27,7 +27,7 @@ class MulticastReceiveProcess:
         f = open(str(self.ip) + '_receive.txt', 'w')
         while True:
             data, address = self.sock.recvfrom(self.message_max_size)
-            if random.random() < 0.1:
+            if random.random() < 0.5:
                 continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             self.unicast_send(address, message_id, 1, 0, 0)

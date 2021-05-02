@@ -28,6 +28,7 @@ class MulticastSendProcess:
         self.congestion_window = 1
         self.timer = threading.Timer(0.1, self.resent_message)
         self.start = time.time()
+        self.total_multicast = 0
         self.f = open('send.txt', 'w')
 
     def multicast_send(self, buffer_block):
@@ -35,6 +36,8 @@ class MulticastSendProcess:
         s = struct.Struct('IIII')
         packed_data = s.pack(*data) + buffer_block[1]
         self.sock.sendto(packed_data, (self.mcast_group_ip, self.mcast_group_port))
+        self.total_multicast += 1
+        self.f.write(str(self.total_multicast) + " " + str(self.congestion_window) + "\n")
         print(
             f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
 
@@ -65,7 +68,7 @@ class MulticastSendProcess:
                         self.message_nak_num[message_id] = 1
                     else:
                         self.message_nak_num[message_id] += 1
-                        print(message_id, "NAK", address)
+                    print(message_id, "NAK", address)
                     self.check_nak(address)
                 else:
                     pass
@@ -101,6 +104,8 @@ class MulticastSendProcess:
     def resent_message(self):
         if self.base == self.block_num:
             print('Running time: %s Seconds'%str(time.time() - self.start))
+            print('Total send number:', self.total_multicast)
+            self.f.close()
             sys.exit()
         print("resend message: ", self.base)
         self.timer.cancel()
