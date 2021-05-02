@@ -37,7 +37,7 @@ class MulticastSendProcess:
         packed_data = s.pack(*data) + buffer_block[1]
         self.sock.sendto(packed_data, (self.mcast_group_ip, self.mcast_group_port))
         self.total_multicast += 1
-        self.f.write(str(self.total_multicast) + " " + str(self.congestion_window) + "\n")
+        self.f.write(str(self.total_multicast) + " " + str(self.congestion_window) + "\n\n" + str(self.total_multicast) + " " + str(self.congestion_window) + "\n")
         print(
             f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
 
