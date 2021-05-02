@@ -20,7 +20,7 @@ class MulticastSendProcess:
         self.window_is_nak = [0, 0, 0, 0]
         self.total_nak_num = 0
         self.message_nak_num = {}
-        self.group_size = 1
+        self.group_size = 3
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.block_num = 200
@@ -63,7 +63,7 @@ class MulticastSendProcess:
                     # self.f.close()
                 elif is_nak:
                     self.total_nak_num += 1
-                    self.congestion_window = max(self.congestion_window - 1 / self.group_size, 1)
+                    self.congestion_window = max(self.congestion_window - self.congestion_window / (2 * self.group_size), 1)
                     if self.message_nak_num.get(message_id) is None:
                         self.message_nak_num[message_id] = 1
                     else:
@@ -91,11 +91,12 @@ class MulticastSendProcess:
         packed_data = self.struct.pack(*data)
         self.sock.sendto(packed_data, destination)
 
+# self.group_size / 2
     def check_nak(self, address):
-        if self.total_nak_num > self.group_size / 2:
+        if self.total_nak_num > 0:
             while len(self.message_nak_num) > 0:
                 buffer_id, nak_num = self.message_nak_num.popitem()
-                if nak_num > self.group_size / 2:
+                if nak_num > 0:
                     self.multicast_send(self.file_buffer[buffer_id])
                     self.total_nak_num -= nak_num
                 # else:
