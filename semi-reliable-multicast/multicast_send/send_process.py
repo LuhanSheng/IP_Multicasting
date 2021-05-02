@@ -22,7 +22,8 @@ class MulticastSendProcess:
         self.group_size = 1
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.file_buffer = [[i, bytes(1000)] for i in range(200)]
+        self.block_num = 200
+        self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
         self.congestion_window = 1
         self.timer = threading.Timer(0.2, self.resent_message)
 
@@ -37,7 +38,12 @@ class MulticastSendProcess:
     def send_buffer(self):
         buffer_length = len(self.file_buffer)
         self.timer.start()
+        start = time.clock()
         while True:
+            if self.next_seq_num == self.block_num:
+                end = time.clock()
+                print(end - start)
+                break
             if buffer_length >= self.base and not self.window_is_full and self.next_seq_num - self.base < self.congestion_window:
                 self.multicast_send(self.file_buffer[self.next_seq_num])
                 self.next_seq_num += 1

@@ -16,11 +16,4 @@ def evaluate(ip, totalPacketNum):
 
 
 if __name__ == '__main__':
-    import socket
-
-    # 获取计算机名称
-    hostname =
-    # 获取本机IP
-    ip = socket.gethostbyname(socket.gethostname())
-    print(ip)
-    # evaluate(52)
+    evaluate(52)
