@@ -1,9 +1,9 @@
-import signal
 import socket
 import struct
 import threading
 import time
 import random
+from evaluate import evaluate
 
 class MulticastReceiveProcess:
     def __init__(self):
@@ -15,6 +15,7 @@ class MulticastReceiveProcess:
         self.window_is_received = [-1, -1, -1, -1]
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.struct = struct.Struct('IIII')
+        self.total_packet_num = 20
 
 
     def multicast_receive(self):
@@ -32,8 +33,8 @@ class MulticastReceiveProcess:
             message = data[16:]
             f.write(str(message_id) + "\n")
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}')
-            if message_id == 19:
-            	break
+            if message_id == self.total_packet_num - 1:
+                break
             current = message_id - self.base
             if current > 0:
                 for i in range(self.base, message_id):
@@ -45,6 +46,7 @@ class MulticastReceiveProcess:
             else:
                 pass
         f.close()
+        evaluate(self.total_packet_num)
 
     def unicast_send(self, destination, message_id, is_ack, is_nak, message_length):
         data = (message_id, is_ack, is_nak, message_length)
