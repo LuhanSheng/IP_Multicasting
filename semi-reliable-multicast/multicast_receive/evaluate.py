@@ -1,6 +1,6 @@
 
-def evaluate(totalPacketNum):
-    f = open('receive.txt', 'r')
+def evaluate(ip, totalPacketNum):
+    f = open(str(ip) + '_receive.txt', 'r')
     lines = f.readlines()
     s = set()
     l = []
@@ -10,9 +10,9 @@ def evaluate(totalPacketNum):
         l.append(line[0:-1])
         print(line[0:-1])
 
-    print("Total number of received: ", len(s))
-    print("Effective number of received: ", len(l))
-    print("Percentage of received: ", len(l) / totalPacketNum * 100, "%")
+    print("Total number of received: ", len(l))
+    print("Effective number of received: ", len(s))
+    print("Percentage of received: ", len(s) / totalPacketNum * 100, "%")
 
 
 if __name__ == '__main__':

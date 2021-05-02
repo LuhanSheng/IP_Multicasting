@@ -14,8 +14,9 @@ class MulticastReceiveProcess:
         self.base = 0
         self.window_is_received = [-1, -1, -1, -1]
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.ip = socket.gethostbyname(socket.gethostname())
         self.struct = struct.Struct('IIII')
-        self.total_packet_num = 20
+        self.total_packet_num = 200
 
 
     def multicast_receive(self):
@@ -23,10 +24,10 @@ class MulticastReceiveProcess:
         # 加入组播组
         mreq = struct.pack("=4sl", socket.inet_aton(self.mcast_group_ip), socket.INADDR_ANY)
         self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-        f = open('receive.txt', 'w')
+        f = open(str(self.ip) + '_receive.txt', 'w')
         while True:
             data, address = self.sock.recvfrom(self.message_max_size)
-            if random.random() < 0.5:
+            if random.random() < 0.1:
                 continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             self.unicast_send(address, message_id, 1, 0, 0)
@@ -46,7 +47,7 @@ class MulticastReceiveProcess:
             else:
                 pass
         f.close()
-        evaluate(self.total_packet_num)
+        evaluate(self.ip, self.total_packet_num)
 
     def unicast_send(self, destination, message_id, is_ack, is_nak, message_length):
         data = (message_id, is_ack, is_nak, message_length)

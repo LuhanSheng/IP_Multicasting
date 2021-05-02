@@ -22,7 +22,7 @@ class MulticastSendProcess:
         self.group_size = 1
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.file_buffer = [[i, bytes(1000)] for i in range(20)]
+        self.file_buffer = [[i, bytes(1000)] for i in range(200)]
         self.congestion_window = 1
         self.timer = threading.Timer(0.2, self.resent_message)
 
