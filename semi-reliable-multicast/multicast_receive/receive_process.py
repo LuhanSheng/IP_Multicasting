@@ -19,7 +19,6 @@ class MulticastReceiveProcess:
         self.total_packet_num = 200
         self.cached_block_num = set()
 
-
     def multicast_receive(self):
         self.sock.bind(("0.0.0.0", self.mcast_group_port))
         # 加入组播组
@@ -35,25 +34,26 @@ class MulticastReceiveProcess:
             message = data[16:]
             f.write(str(message_id) + "\n")
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}')
-            if self.base == self.total_packet_num - 1:
-                break
             current = message_id - self.base
             if current > 0:
+                self.cached_block_num.add(message_id)
                 for i in range(self.base, message_id):
-                    self.unicast_send(address, i, 0, 1, 0)
-                self.cached_block_num.add(current)
+                    if i not in self.cached_block_num:
+                        self.unicast_send(address, i, 0, 1, 0)
                     # self.base += 1
                 # self.base += 1
             elif current == 0:
                 self.base += 1
                 while self.base in self.cached_block_num:
-                    self.base += 1
                     self.cached_block_num.remove(self.base)
+                    self.base += 1
             else:
                 pass
+            if self.base == self.total_packet_num:
+                break
         f.close()
         evaluate(self.ip, self.total_packet_num)
-
+        
     def unicast_send(self, destination, message_id, is_ack, is_nak, message_length):
         data = (message_id, is_ack, is_nak, message_length)
         packed_data = self.struct.pack(*data)
