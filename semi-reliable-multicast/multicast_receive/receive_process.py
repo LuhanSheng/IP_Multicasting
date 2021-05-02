@@ -14,8 +14,8 @@ class MulticastReceiveProcess:
         self.base = 0
         self.window_is_received = [-1, -1, -1, -1]
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.sock.connect(('8.0.0.1', 80))
-        self.ip = self.sock.getsockname()[0]
+        self.ip = [(s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close()) for s in
+               [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
         self.struct = struct.Struct('IIII')
         self.total_packet_num = 200
         self.cached_block_num = set()
