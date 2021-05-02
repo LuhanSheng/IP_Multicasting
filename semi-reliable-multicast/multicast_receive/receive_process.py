@@ -40,8 +40,6 @@ class MulticastReceiveProcess:
                 for i in range(self.base, message_id):
                     if i not in self.cached_block_num:
                         self.unicast_send(address, i, 0, 1, 0)
-                    # self.base += 1
-                # self.base += 1
             elif current == 0:
                 self.base += 1
                 while self.base in self.cached_block_num:

@@ -15,4 +15,6 @@ def evaluate(ip, totalPacketNum):
 
 
 if __name__ == '__main__':
+    l = [0 for i in range(4)]
+    print(l)
     evaluate(52)
