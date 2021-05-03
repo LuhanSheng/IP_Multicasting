@@ -19,17 +19,18 @@ class MulticastSendProcess:
         self.window_is_nak = [0, 0, 0, 0]
         self.total_nak_num = 0
         self.message_nak_num = {}
-        self.group_size = 4
+        self.group_size = 1
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.block_num = 1000
         self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
         self.congestion_window = 1
-        self.timer = threading.Timer(0.05, self.resent_message)
+        self.timer = threading.Timer(0.001, self.resent_message)
         self.start = time.time()
         self.total_multicast = 0
         self.ack_rate = 1
         self.f = open('send.txt', 'w')
+        self.ack_num = 0 
 
     def multicast_send(self, buffer_block):
         data = (buffer_block[0], 0, 0, len(buffer_block[1]))
@@ -55,6 +56,8 @@ class MulticastSendProcess:
             data, address = self.sock.recvfrom(self.message_max_size)
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             window_current = message_id - self.base
+            if is_ack:
+                self.ack_num += 1
             if window_current <= self.window_size - 1:
                 if is_ack and window_current >= 0:
                     self.window_is_ack[window_current] += 1
@@ -107,6 +110,7 @@ class MulticastSendProcess:
         if self.base == self.block_num:
             print('Running time: %s Seconds'%str(time.time() - self.start))
             print('Total send number:', self.total_multicast)
+            print('Total ACK number:', self.ack_num)
             self.f.close()
             sys.exit()
         print("resend message: ", self.base)
@@ -117,7 +121,7 @@ class MulticastSendProcess:
         self.congestion_window = max(self.congestion_window / 2, 1)
 
     def new_timer(self):
-        self.timer = threading.Timer(0.05, self.resent_message)
+        self.timer = threading.Timer(0.001, self.resent_message)
 
     def run(self):
         thread_routines = [
