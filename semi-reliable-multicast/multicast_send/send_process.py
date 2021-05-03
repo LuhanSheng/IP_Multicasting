@@ -14,7 +14,7 @@ class MulticastSendProcess:
         self.message_max_size = 2048
         self.base = 0
         self.next_seq_num = 0
-        self.window_size = 60
+        self.window_size = 10
         self.window_is_full = False
         self.window_is_ack = [0 for i in range(self.window_size)]
         self.window_is_nak = [0, 0, 0, 0]
