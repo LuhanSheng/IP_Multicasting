@@ -5,6 +5,8 @@
       <sourceFolder url="file://$MODULE_DIR$/semi-reliable-multicast" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/semi-reliable-multicast/multicast_receive" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/semi-reliable-multicast/multicast_send" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/naive-multicast/naive_receive" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/naive-multicast/naive_send" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
