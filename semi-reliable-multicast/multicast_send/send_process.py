@@ -14,19 +14,19 @@ class MulticastSendProcess:
         self.message_max_size = 2048
         self.base = 0
         self.next_seq_num = 0
-        self.window_size = 10
+        self.window_size = 60
         self.window_is_full = False
         self.window_is_ack = [0 for i in range(self.window_size)]
         self.window_is_nak = [0, 0, 0, 0]
         self.total_nak_num = 0
         self.message_nak_num = {}
-        self.group_size = 3
+        self.group_size = 4
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.block_num = 200
+        self.block_num = 1000
         self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
         self.congestion_window = 1
-        self.timer = threading.Timer(0.1, self.resent_message)
+        self.timer = threading.Timer(0.05, self.resent_message)
         self.start = time.time()
         self.total_multicast = 0
         self.f = open('send.txt', 'w')
@@ -44,7 +44,7 @@ class MulticastSendProcess:
     def send_buffer(self):
         self.timer.start()
         while True:
-            if self.block_num >= self.base and not self.window_is_full and self.next_seq_num - self.base < self.congestion_window:
+            if self.block_num >= self.base and not self.window_is_full and self.next_seq_num - self.base < self.congestion_window and self.next_seq_num < self.block_num:
                 # self.f.write((self.base) + " " + str(self.congestion_window))
                 self.multicast_send(self.file_buffer[self.next_seq_num])
                 self.next_seq_num += 1
@@ -63,7 +63,7 @@ class MulticastSendProcess:
                     # self.f.close()
                 elif is_nak:
                     self.total_nak_num += 1
-                    self.congestion_window = max(self.congestion_window - self.congestion_window / (2 * self.group_size), 1)
+                    self.congestion_window = max(self.congestion_window - 1 / self.group_size, 1)
                     if self.message_nak_num.get(message_id) is None:
                         self.message_nak_num[message_id] = 1
                     else:
@@ -93,7 +93,7 @@ class MulticastSendProcess:
 
 # self.group_size / 2
     def check_nak(self, address):
-        if self.total_nak_num > 0:
+        if self.total_nak_num > 30:
             while len(self.message_nak_num) > 0:
                 buffer_id, nak_num = self.message_nak_num.popitem()
                 if nak_num > 0:
@@ -116,7 +116,7 @@ class MulticastSendProcess:
         self.congestion_window = max(self.congestion_window / 2, 1)
 
     def new_timer(self):
-        self.timer = threading.Timer(0.1, self.resent_message)
+        self.timer = threading.Timer(0.05, self.resent_message)
 
     def run(self):
         thread_routines = [
