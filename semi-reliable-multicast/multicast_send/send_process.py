@@ -30,6 +30,7 @@ class MulticastSendProcess:
         self.total_multicast = 0
         self.ack_rate = 1
         self.f = open('send.txt', 'w')
+        self.f2 = open('rate.txt', 'w')
         self.ack_num = 0 
 
     def multicast_send(self, buffer_block):
