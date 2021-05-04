@@ -34,14 +34,16 @@ class MulticastReceiveProcess:
             self.timer.cancel()
             self.new_timer()
             self.timer.start()
-            if random.random() < 0.1:
+            if random.random() < 0:
                 continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             message = data[16:]
-            if is_ack == "1" and is_nak == "1":
-                self.ack_rate = message
+            if is_ack == 1 and is_nak == 1:
+                self.ack_rate = float(message)
+                print(self.ack_rate)
                 continue
-            self.unicast_send(address, message_id, 1, 0, 0)
+            if random.random() < self.ack_rate:
+                self.unicast_send(address, message_id, 1, 0, 0)
             self.f.write(str(message_id) + "\n")
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}', self.base)
             current = message_id - self.base

@@ -19,19 +19,21 @@ class MulticastSendProcess:
         self.window_is_nak = [0, 0, 0, 0]
         self.total_nak_num = 0
         self.message_nak_num = {}
-        self.group_size = 1
+        self.group_size = 4
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.block_num = 1000
         self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
         self.congestion_window = 1
-        self.timer = threading.Timer(0.001, self.resent_message)
+        self.timer = threading.Timer(0.03, self.resent_message)
         self.start = time.time()
         self.total_multicast = 0
+        self.rate_total_multicast = 0
         self.ack_rate = 1
         self.f = open('send.txt', 'w')
         self.f2 = open('rate.txt', 'w')
         self.ack_num = 0 
+        self.rate_ack_num = 0
 
     def multicast_send(self, buffer_block):
         data = (buffer_block[0], 0, 0, len(buffer_block[1]))
@@ -39,9 +41,10 @@ class MulticastSendProcess:
         packed_data = s.pack(*data) + buffer_block[1]
         self.sock.sendto(packed_data, (self.mcast_group_ip, self.mcast_group_port))
         self.total_multicast += 1
+        self.rate_total_multicast += 1
         self.f.write(str(self.total_multicast) + " " + str(self.congestion_window) + "\n\n" + str(self.total_multicast) + " " + str(self.congestion_window) + "\n")
-        print(
-            f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
+        self.f2.write(str(self.total_multicast) + " " + str(self.ack_rate) + "\n\n" + str(self.total_multicast) + " " + str(self.ack_rate) + "\n")
+        # print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
 
     def send_buffer(self):
         self.timer.start()
@@ -59,11 +62,28 @@ class MulticastSendProcess:
             window_current = message_id - self.base
             if is_ack:
                 self.ack_num += 1
+                self.rate_ack_num += 1
+                if self.ack_num % (self.group_size * 10) == 0 and self.group_size > 3:
+                    rate = self.rate_ack_num/self.rate_total_multicast
+                    print(rate)
+                    if rate > self.group_size/2:
+                        self.ack_rate = 0.9 * self.ack_rate
+                    elif rate <= self.group_size/2:
+                        self.ack_rate = min(1.11 * self.ack_rate, 1)
+                    else:
+                        self.ack_rate = 1
+                    self.rate_ack_num = 0 
+                    self.rate_total_multicast = 0
+                    data = (0, 1, 1, len(str(self.ack_rate).encode()))
+                    s = struct.Struct('IIII')
+                    packed_data = s.pack(*data) + str(self.ack_rate).encode()
+                    self.sock.sendto(packed_data, (self.mcast_group_ip, self.mcast_group_port))
+                print(self.ack_rate)
             if window_current <= self.window_size - 1:
                 if is_ack and window_current >= 0:
                     self.window_is_ack[window_current] += 1
                     self.check_window()
-                    print(message_id, "ACK", address)
+                    # print(message_id, "ACK", address)
                 elif is_nak:
                     self.total_nak_num += 1
                     self.congestion_window = max(self.congestion_window - 1 / self.group_size, 1)
@@ -71,17 +91,17 @@ class MulticastSendProcess:
                         self.message_nak_num[message_id] = 1
                     else:
                         self.message_nak_num[message_id] += 1
-                    print(message_id, "NAK", address)
+                    # print(message_id, "NAK", address)
                     self.check_nak(address)
                 else:
                     pass
             else:
                 raise ValueError
 
+#self.multicast_send([0, str(self.ack_rate)])
+
     def check_window(self):
-        while self.window_is_ack[0] > 0:
-            if self.window_is_ack.pop(0) > self.group_size / 2 + 1:
-                self.multicast_send([0, str(self.ack_rate)])
+        while self.window_is_ack[0] > 0:       
             self.window_is_ack.pop(0)
             self.window_is_ack.append(0)
             self.base += 1
@@ -113,6 +133,7 @@ class MulticastSendProcess:
             print('Total send number:', self.total_multicast)
             print('Total ACK number:', self.ack_num)
             self.f.close()
+            self.f2.close()
             sys.exit()
         print("resend message: ", self.base)
         self.timer.cancel()
@@ -122,7 +143,7 @@ class MulticastSendProcess:
         self.congestion_window = max(self.congestion_window / 2, 1)
 
     def new_timer(self):
-        self.timer = threading.Timer(0.001, self.resent_message)
+        self.timer = threading.Timer(0.03, self.resent_message)
 
     def run(self):
         thread_routines = [
