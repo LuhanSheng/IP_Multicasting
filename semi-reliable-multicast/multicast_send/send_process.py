@@ -3,7 +3,6 @@ import socket
 import struct
 import threading
 import time
-import binascii
 
 
 class MulticastSendProcess:
@@ -29,6 +28,7 @@ class MulticastSendProcess:
         self.timer = threading.Timer(0.05, self.resent_message)
         self.start = time.time()
         self.total_multicast = 0
+        self.ack_rate = 1
         self.f = open('send.txt', 'w')
 
     def multicast_send(self, buffer_block):
@@ -60,7 +60,6 @@ class MulticastSendProcess:
                     self.window_is_ack[window_current] += 1
                     self.check_window()
                     print(message_id, "ACK", address)
-                    # self.f.close()
                 elif is_nak:
                     self.total_nak_num += 1
                     self.congestion_window = max(self.congestion_window - 1 / self.group_size, 1)
@@ -77,6 +76,8 @@ class MulticastSendProcess:
 
     def check_window(self):
         while self.window_is_ack[0] > 0:
+            if self.window_is_ack.pop(0) > self.group_size / 2 + 1:
+                self.multicast_send([0, str(self.ack_rate)])
             self.window_is_ack.pop(0)
             self.window_is_ack.append(0)
             self.base += 1

@@ -22,6 +22,7 @@ class MulticastReceiveProcess:
         self.timer = threading.Timer(10, self.exit)
         self.f = open(str(self.ip) + '_receive.txt', 'w')
         self.biggest_received = -1
+        self.ack_rate = 1
 
     def multicast_receive(self):
         self.sock.bind(("0.0.0.0", self.mcast_group_port))
@@ -36,12 +37,15 @@ class MulticastReceiveProcess:
             if random.random() < 0.1:
                 continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
-            self.unicast_send(address, message_id, 1, 0, 0)
             message = data[16:]
+            if is_ack == "1" and is_nak == "1":
+                self.ack_rate = message
+                continue
+            self.unicast_send(address, message_id, 1, 0, 0)
             self.f.write(str(message_id) + "\n")
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}', self.base)
             current = message_id - self.base
-            if current > 0 and message_id > self.biggest_received + 1:
+            if current > 0 and message_id > self.biggest_received + 1 and message_id not in self.cached_block_num:
                 self.cached_block_num.add(message_id)
                 for i in range(self.base, message_id):
                     if i not in self.cached_block_num:
