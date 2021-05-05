@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/IP_Multicasting.iml" filepath="$PROJECT_DIR$/.idea/IP_Multicasting.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../hat0518/.idea/hat0518.iml" filepath="$PROJECT_DIR$/../hat0518/.idea/hat0518.iml" />
       <module fileurl="file://$PROJECT_DIR$/../reliable-multicast-chat-master/.idea/reliable-multicast-chat-master.iml" filepath="$PROJECT_DIR$/../reliable-multicast-chat-master/.idea/reliable-multicast-chat-master.iml" />
     </modules>
   </component>

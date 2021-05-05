@@ -16,6 +16,9 @@ def evaluate(ip, totalPacketNum):
 
 if __name__ == '__main__':
     import socket
-    print([(s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close()) for s in
-               [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1])
-    evaluate(52)
+    s = "0.26".encode()
+    d = float(s)
+    print(d)
+    # print([(s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close()) for s in
+    #            [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1])
+    # evaluate(52)

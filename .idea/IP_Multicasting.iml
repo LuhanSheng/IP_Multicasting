@@ -11,6 +11,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="reliable-multicast-chat-master" />
+    <orderEntry type="module" module-name="hat0518" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />
