@@ -3,7 +3,7 @@ import socket
 import struct
 import threading
 import time
-
+from buffer import buffer
 
 class MulticastSendProcess:
 
@@ -22,8 +22,9 @@ class MulticastSendProcess:
         self.group_size = 4
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.block_num = 1000
-        self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
+        # self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
+        self.file_buffer = buffer('test.mp4')
+        self.block_num = len(self.file_buffer)
         self.congestion_window = 1
         self.timer = threading.Timer(0.03, self.resent_message)
         self.start = time.time()
@@ -44,7 +45,7 @@ class MulticastSendProcess:
         self.rate_total_multicast += 1
         self.f.write(str(self.total_multicast) + " " + str(self.congestion_window) + "\n\n" + str(self.total_multicast) + " " + str(self.congestion_window) + "\n")
         self.f2.write(str(self.total_multicast) + " " + str(self.ack_rate) + "\n\n" + str(self.total_multicast) + " " + str(self.ack_rate) + "\n")
-        # print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
+        print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: message ' + str(buffer_block[0]) + ' send finish')
 
     def send_buffer(self):
         self.timer.start()
