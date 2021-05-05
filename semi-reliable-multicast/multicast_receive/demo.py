@@ -2,6 +2,14 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+import socket
+import struct
+import threading
+import time
+import random
+import os, time, sys
+from evaluate import evaluate
+from receive_process import MulticastReceiveProcess
 
 
 class filedialogdemo(QWidget):
@@ -30,11 +38,25 @@ class filedialogdemo(QWidget):
         self.setLayout(layout)
 
     def loadFile(self):
-        print("load--file")
-        fname, _ = QFileDialog.getOpenFileName(self, '选择图片', 'c:\\', 'Image files(*.jpg *.gif *.png)')
-        self.label.setPixmap(QPixmap(fname))
+        multicast_receive_process = MulticastReceiveProcess()
+        multicast_receive_process.run()
+        # print("load--file")
+        # fname, _ = QFileDialog.getOpenFileName(self, '选择图片', 'c:\\', 'Image files(*.jpg *.gif *.png)')
+        # self.label.setPixmap(QPixmap(fname))
 
-    def load_text(self):
+    def load_text(self, txt):
+        pipe_name = 'pipe_test'
+        if not os.path.exists(pipe_name):
+            os.mkfifo(pipe_name)
+            
+        print("xxx1")
+        pipein = open(pipe_name, os.O_RDONLY | os.O_NONBLOCK)
+        print("xxx2")
+        while True:
+            line = pipein.readlines()
+            print("reading", line)
+            self.content.setText(line)
+        '''
         print("load--text")
         dlg = QFileDialog()
         dlg.setFileMode(QFileDialog.AnyFile)
@@ -45,7 +67,7 @@ class filedialogdemo(QWidget):
             with f:
                 data = f.read()
                 self.content.setText(data)
-
+        '''
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
