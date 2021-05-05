@@ -39,7 +39,9 @@ class MulticastSendProcess:
     def multicast_send(self, buffer_block):
         data = (buffer_block[0], 0, 0, len(buffer_block[1]))
         s = struct.Struct('IIII')
+        print(len(buffer_block[1]))
         packed_data = s.pack(*data) + buffer_block[1]
+        print(len(packed_data))
         self.sock.sendto(packed_data, (self.mcast_group_ip, self.mcast_group_port))
         self.total_multicast += 1
         self.rate_total_multicast += 1
@@ -66,7 +68,6 @@ class MulticastSendProcess:
                 self.rate_ack_num += 1
                 if self.ack_num % (self.group_size * 10) == 0 and self.group_size > 3:
                     rate = self.rate_ack_num/self.rate_total_multicast
-                    print(rate)
                     if rate > self.group_size/2:
                         self.ack_rate = 0.9 * self.ack_rate
                     elif rate <= self.group_size/2:
@@ -79,7 +80,7 @@ class MulticastSendProcess:
                     s = struct.Struct('IIII')
                     packed_data = s.pack(*data) + str(self.ack_rate).encode()
                     self.sock.sendto(packed_data, (self.mcast_group_ip, self.mcast_group_port))
-                print(self.ack_rate)
+
             if window_current <= self.window_size - 1:
                 if is_ack and window_current >= 0:
                     self.window_is_ack[window_current] += 1
@@ -133,6 +134,7 @@ class MulticastSendProcess:
             print('Running time: %s Seconds'%str(time.time() - self.start))
             print('Total send number:', self.total_multicast)
             print('Total ACK number:', self.ack_num)
+            print('Total block number:', self.block_num)
             self.f.close()
             self.f2.close()
             sys.exit()

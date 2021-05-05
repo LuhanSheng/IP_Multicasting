@@ -21,7 +21,7 @@ class MulticastReceiveProcess:
         self.ip = [(s.connect(('10.0.0.100', 53)), s.getsockname()[0], s.close()) for s in
                [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
         self.struct = struct.Struct('IIII')
-        self.total_packet_num = 76
+        self.total_packet_num = 4990
         self.cached_block_num = set()
         self.timer = threading.Timer(10, self.exit)
         self.f = open(str(self.ip) + '_receive.txt', 'w')
@@ -29,7 +29,7 @@ class MulticastReceiveProcess:
         self.biggest_received = -1
         self.ack_rate = 1
         self.pipe_name = 'pipe_test'
-        
+        self.buffer = {}
         
 
     def multicast_receive(self):
@@ -48,7 +48,7 @@ class MulticastReceiveProcess:
                 continue
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             message = data[16:]
-            self.f2.write(message)
+            print(len(message))
             if is_ack == 1 and is_nak == 1:
                 self.ack_rate = float(message)
                 print(self.ack_rate)
@@ -56,18 +56,21 @@ class MulticastReceiveProcess:
             if random.random() < self.ack_rate:
                 self.unicast_send(address, message_id, 1, 0, 0)
             self.f.write(str(message_id) + "\n")
-            print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}', self.base)
+            # print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}', self.base)
             current = message_id - self.base
             if current > 0 and message_id > self.biggest_received + 1 and message_id not in self.cached_block_num:
                 self.cached_block_num.add(message_id)
+                self.buffer[message_id] = message
                 for i in range(self.base, message_id):
                     if i not in self.cached_block_num:
                         self.unicast_send(address, i, 0, 1, 0)
                         print("Send NAK", i)
             elif current > 0:
                 self.cached_block_num.add(message_id)
+                self.buffer[message_id] = message
             elif current == 0:
                 self.base += 1
+                self.buffer[message_id] = message
                 while self.base in self.cached_block_num:
                     self.cached_block_num.remove(self.base)
                     self.base += 1
@@ -86,8 +89,10 @@ class MulticastReceiveProcess:
 
     def exit(self):
         self.f.close()
+        for i in self.buffer:
+            self.f2.write(self.buffer[i])
         self.f2.close()
-        evaluate(self.ip, self.total_packet_num)  
+        evaluate(self.ip, len(self.buffer))  
         
     def new_timer(self):
         self.timer = threading.Timer(1, self.exit)
