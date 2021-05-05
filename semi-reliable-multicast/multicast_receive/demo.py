@@ -50,7 +50,7 @@ class filedialogdemo(QWidget):
             os.mkfifo(pipe_name)
             
         print("xxx1")
-        pipein = open(pipe_name, os.O_RDONLY | os.O_NONBLOCK)
+        pipein = open(pipe_name, "rb")
         print("xxx2")
         while True:
             line = pipein.readlines()

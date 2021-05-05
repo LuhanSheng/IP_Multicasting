@@ -38,9 +38,6 @@ class MulticastReceiveProcess:
         self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         # if not os.path.exists(self.pipe_name):
             # os.mkfifo(self.pipe_name)
-        print("xxx")
-        self.pipeout = os.open(self.pipe_name, os.O_WRONLY)   
-        print("xxx")
         while True:
             data, address = self.sock.recvfrom(self.message_max_size)
             self.timer.cancel()
@@ -58,7 +55,8 @@ class MulticastReceiveProcess:
                 self.unicast_send(address, message_id, 1, 0, 0)
             self.f.write(str(message_id) + "\n")
             print(f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}: Receive data from {address}: {message_id}', self.base)
-            os.write(self.pipeout, "writting".encode())
+            os.write(self.pipeout, "writing".encode())
+            self.pipeout.flush()
             current = message_id - self.base
             if current > 0 and message_id > self.biggest_received + 1 and message_id not in self.cached_block_num:
                 self.cached_block_num.add(message_id)
