@@ -14,4 +14,5 @@ if __name__ == '__main__':
     f = open('new.mp4', 'wb')
     for b in buffer:
         f.write(b[1])
+    print(len(buffer))
     f.close()
