@@ -7,6 +7,7 @@ def buffer(filename):
     for i in range(0, packet_num):
         temp_buf = [i, lines[i * size: (i + 1) * size]]
         buf.append(temp_buf)
+    buf.append([packet_num, lines[packet_num * size: ]])
     return buf
 
 if __name__ == '__main__':
