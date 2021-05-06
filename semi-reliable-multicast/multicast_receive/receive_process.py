@@ -21,7 +21,7 @@ class MulticastReceiveProcess:
         self.ip = [(s.connect(('10.0.0.100', 53)), s.getsockname()[0], s.close()) for s in
                [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
         self.struct = struct.Struct('IIII')
-        self.total_packet_num = 4990
+        self.total_packet_num = 2498
         self.cached_block_num = set()
         self.timer = threading.Timer(10, self.exit)
         self.f = open(str(self.ip) + '_receive.txt', 'w')
