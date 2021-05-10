@@ -21,7 +21,7 @@ class MulticastReceiveProcess:
         self.ip = [(s.connect(('10.0.0.100', 53)), s.getsockname()[0], s.close()) for s in
                [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
         self.struct = struct.Struct('IIII')
-        self.total_packet_num = 2499
+        self.total_packet_num = 2000
         self.cached_block_num = set()
         self.timer = threading.Timer(10, self.exit)
         self.f = open(str(self.ip) + '_receive.txt', 'w')
@@ -30,7 +30,7 @@ class MulticastReceiveProcess:
         self.ack_rate = 1
         self.pipe_name = 'pipe_test'
         self.buffer = {}
-        self.loss_rate = 0.3
+        self.loss_rate = 0
         
 
     def multicast_receive(self):
@@ -50,7 +50,7 @@ class MulticastReceiveProcess:
             (message_id, is_ack, is_nak, message_length) = self.struct.unpack(data[0:16])
             message = data[16:]
             if is_ack == 1 and is_nak == 1:
-                self.ack_rate = 1 # float(message)
+                self.ack_rate = float(message)
                 # print(self.ack_rate)
                 continue
             if random.random() < self.ack_rate:
@@ -93,7 +93,7 @@ class MulticastReceiveProcess:
         for i in sequence:
             self.f2.write(self.buffer[i])
         self.f2.close()
-        evaluate(self.ip, 2499)  
+        evaluate(self.ip, 1000)  
         
     def new_timer(self):
         self.timer = threading.Timer(1, self.exit)

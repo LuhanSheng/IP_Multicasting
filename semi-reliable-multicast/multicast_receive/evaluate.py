@@ -12,6 +12,7 @@ def evaluate(ip, totalPacketNum):
     print("Total number of received: ", len(l))
     print("Effective number of received: ", len(s))
     print("Percentage of received: ", len(s) / totalPacketNum * 100, "%")
+    print("Repeat rate: ", (len(l) - len(s))/len(l))
 
 
 if __name__ == '__main__':

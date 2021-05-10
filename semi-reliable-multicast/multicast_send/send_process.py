@@ -20,10 +20,11 @@ class MulticastSendProcess:
         self.total_nak_num = 0
         self.message_nak_num = {}
         self.group_size = 4
+        self.block_num = 2000
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        # self.file_buffer = [[i, bytes(1000)] for i in range(self.block_num)]
-        self.file_buffer = buffer('test.mp4')
+        self.file_buffer = [[i, bytes(10000)] for i in range(self.block_num)]
+        # self.file_buffer = buffer('test.mp4')
         self.block_num = len(self.file_buffer)
         self.congestion_window = 1
         self.timer = threading.Timer(0.03, self.resent_message)
@@ -134,6 +135,7 @@ class MulticastSendProcess:
             print('Total send number:', self.total_multicast)
             print('Total ACK number:', self.ack_num)
             print('Total block number:', self.block_num)
+            print('Effeciency:', self.block_num/self.total_multicast)
             self.f.close()
             self.f2.close()
             sys.exit()
