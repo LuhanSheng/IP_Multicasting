@@ -32,6 +32,7 @@ xterm H0 H1 H2 H3 H4
 In each terminal of the receivers:  
 cd multicast_receive  
 python3 receive_process.py  
+
 In the terminal of the sender:  
 cd multicast_send  
 python3 send_process.py  
