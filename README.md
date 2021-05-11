@@ -15,26 +15,26 @@ The most up-to-date version provided here is 5.1.2.
 
 
 ## Install
-Please install Mininet(v2.3.0) and ovs(2.13.1) on the machine.
-This demo requires python version >= 3.6 and is based on Ubuntu(v20.04.1).
+Please install Mininet(v2.3.0) and ovs(2.13.1) on the machine.  
+This demo requires python version >= 3.6 and is based on Ubuntu(v20.04.1).  
 
 ## About this demo
-Implementation of the sender of SRIMP is in folder semi-reliable-multicast/multicast_send
-Implementation of the receiver of SRIMP is in folder semi-reliable-multicast/multicast_receive
+Implementation of the sender of SRIMP is in folder semi-reliable-multicast/multicast_send  
+Implementation of the receiver of SRIMP is in folder semi-reliable-multicast/multicast_receive  
 
 ## Run this demo
-1. Download or pull this repository to your machine.
-2. Construct the multicast network topology.
-cd semi-reliable-multicast
-sudo python3 simple-multicast-topo.py 
-xterm H0 H1 H2 H3 H4
-3. 5 terminals should be opened after doing step 2, with H0 as the sender and H1, H2, H3, H4 as the receivers.
-In each terminal of the receivers:
-cd multicast_receive
-python3 receive_process.py
-In the terminal of the sender:
-cd multicast_send
-python3 send_process.py
+1. Download or pull this repository to your machine.  
+2. Construct the multicast network topology.  
+cd semi-reliable-multicast  
+sudo python3 simple-multicast-topo.py  
+xterm H0 H1 H2 H3 H4  
+3. 5 terminals should be opened after doing step 2, with H0 as the sender and H1, H2, H3, H4 as the receivers.  
+In each terminal of the receivers:  
+cd multicast_receive  
+python3 receive_process.py  
+In the terminal of the sender:  
+cd multicast_send  
+python3 send_process.py  
 
 ## Author
 
