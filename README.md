@@ -25,22 +25,22 @@ Implementation of the receiver of SRIMP is in folder semi-reliable-multicast/mul
 ## Run this demo
 1. Download or pull this repository to your machine.  
 2. Construct the multicast network topology. 
- ''' 
+```
 cd semi-reliable-multicast  
 sudo python3 simple-multicast-topo.py  
 xterm H0 H1 H2 H3 H4  
-'''
+```
 3. 5 terminals should be opened after doing step 2, with H0 as the sender and H1, H2, H3, H4 as the receivers.  
 In each terminal of the receivers:  
-'''
+```
 cd multicast_receive  
 python3 receive_process.py  
-'''
+```
 In the terminal of the sender:  
-'''
+```
 cd multicast_send  
 python3 send_process.py  
-'''
+```
 
 ## Author
 
