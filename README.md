@@ -1,6 +1,7 @@
 # Semi-Reliable IP Multicast
 
-![Revit API](https://img.shields.io/badge/Revit%20API-2020-blue.svg)
+![Mininet](https://img.shields.io/badge/Mininet-2.3.0-blue)
+![ovs](https://img.shields.io/badge/ovs-2.13.1-yellowgreen)
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgray.svg)
 ![.NET](https://img.shields.io/badge/.NET-4.7-blue.svg)
 
