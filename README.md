@@ -5,8 +5,8 @@
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgray.svg)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04.1-orange)
 
-This repository is a demo of SRIMP: A Semi-reliable IP multicast protocol. 
-Implementation of this demo is in the folder named semi-reliable-multicast.
+This repository is a demo of SRIMP: A Semi-reliable IP multicast protocol.  
+Implementation of this demo is in the folder named semi-reliable-multicast.  
 
 
 ## <a name="versions"></a> Versions
