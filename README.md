@@ -23,7 +23,7 @@ Implementation of the sender of SRIMP is in folder semi-reliable-multicast/multi
 Implementation of the receiver of SRIMP is in folder semi-reliable-multicast/multicast_receive  
 
 ## Run this demo
-1. Download or pull this repository to your machine.  
+1. Download or clone this repository to your machine.  
 2. Construct the multicast network topology. 
 ```
 cd semi-reliable-multicast  
