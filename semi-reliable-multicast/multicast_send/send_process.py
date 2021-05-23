@@ -27,7 +27,6 @@ class MulticastSendProcess:
         self.file_buffer = [[i, bytes(10000)] for i in range(self.block_num)]
         # Send file
         # self.file_buffer = buffer('test.mp4')
-
         self.block_num = len(self.file_buffer)
         self.congestion_window = 1
         self.timer = threading.Timer(0.03, self.resent_message)
@@ -53,6 +52,7 @@ class MulticastSendProcess:
 
     def send_buffer(self):
         self.timer.start()
+        # if window is not full, then send segment.
         while True:
             if self.block_num >= self.base and not self.window_is_full and self.next_seq_num - self.base < self.congestion_window and self.next_seq_num < self.block_num:
                 # self.f.write((self.base) + " " + str(self.congestion_window))
