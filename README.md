@@ -42,7 +42,15 @@ In the terminal of the sender:
 cd multicast_send  
 python3 send_process.py  
 ```
-
+4. Note: 
+To send file, please add file you want to send in the folder named multicast_send and change the line 25 in send_process.py of
+```
+self.file_buffer = [[i, bytes(10000)] for i in range(self.block_num)]
+```
+to
+```
+self.file_buffer = buffer(filename)
+```
 ## Author
 
 Implemented by Luhan Sheng.
