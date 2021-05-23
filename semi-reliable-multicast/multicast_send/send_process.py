@@ -23,8 +23,11 @@ class MulticastSendProcess:
         self.block_num = 2000
         self.struct = struct.Struct('IIII')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        # Send block_num datagrams of 10000 bytes in size
         self.file_buffer = [[i, bytes(10000)] for i in range(self.block_num)]
+        # Send file
         # self.file_buffer = buffer('test.mp4')
+
         self.block_num = len(self.file_buffer)
         self.congestion_window = 1
         self.timer = threading.Timer(0.03, self.resent_message)
